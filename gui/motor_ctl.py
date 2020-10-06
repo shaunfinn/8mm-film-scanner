@@ -1,49 +1,62 @@
-from config import run_motor
+#from config import run_motor
 import time
+import config
 
-print( "motor_ctrl run_motor", run_motor)
+from PyQt5 import QtCore as qtc
+from PyQt5 import QtGui as qtg
+from PyQt5 import QtWidgets as qtw
+from PyQt5 import uic
 
+
+
+#worker for doing motor controls in a seperate thread
+class Worker(qtc.QObject):
+
+    motor_stopped = qtc.pyqtSignal()
+
+    @qtc.pyqtSlot()
+    def motorRunning(self):
+        #global run_motor
+        config.run_motor = True
+        while config.run_motor:
+            time.sleep(0.5)
+            print("motor running")
+        print("while loop broken")
+            
+        self.motor_stopped.emit()
+        
+        
 class stepperControl():
     
-  
+    
     def __init__(self):
-        print("motor init")
+        print(self.__name__)
 
-    def ffwd(self):
-        while run_motor:
-            time.sleep(1)
-            print("motor runnning")
-             
+
     def wake(self):
-        GPIO.output(self.sleep_pin, True)
-        logging.debug("motor waking")
-        time.sleep(.1)
+        print(self.__name__)
 
     def sleep(self):
-        GPIO.output(self.sleep_pin, False)
-        logging.debug("motor sleeping")
-        time.sleep(.1)
-        
+        print(self.__name__)
+    
 
     def fwdFrame(self, num=1, speed=100):
         self.wake()
-        logging.debug("fwdFrame "+str(num))
         self.windFrame(num)
         self.sleep()
 
     def windFrame(self, num=1, speed=100):
-        pin=self.pulse_pin  #directly accessing for speed
-        hp=self.half_pulse*speed/100
-        for i in range (0,int(self.steps_per_rev*num)):
-            GPIO.output(pin, True) #used instead of variable for speed
-            time.sleep(hp) #again, directly entring num for speed
-            GPIO.output(pin, False) #used instead of variable for speed
-            time.sleep(hp)        
+        print(self.__name__)
+        #send signal to worker
  
     def revFrame(self, num=1, speed=100):  #winds back one more than necessary, then forward to properly frame
-        logging.debug("revFrame "+str(num))
         self.wake()
-        GPIO.output(self.dir_pin, not self.dir_fwd)
+        #change dir
         self.windFrame(num)
-        GPIO.output(self.dir_pin, self.dir_fwd)
+        #change dir
         self.sleep()
+
+
+
+             
+ 
