@@ -20,7 +20,7 @@
    </size>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="l_img">
     <property name="geometry">
      <rect>
       <x>20</x>
