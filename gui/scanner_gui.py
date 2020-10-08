@@ -184,6 +184,9 @@ class Ui_MainWindow(object):
         self.l_exp_4.setPixmap(QtGui.QPixmap("imgs/blue.png"))
         self.l_exp_4.setScaledContents(True)
         self.l_exp_4.setObjectName("l_exp_4")
+        self.b_triggerDummy = QtWidgets.QPushButton(self.centralwidget)
+        self.b_triggerDummy.setGeometry(QtCore.QRect(500, 10, 31, 23))
+        self.b_triggerDummy.setObjectName("b_triggerDummy")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 728, 21))
@@ -202,6 +205,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.b_triggerDummy.setText(_translate("MainWindow", "+"))
         self.menugrab_webcam_photo.setTitle(_translate("MainWindow", "Scanner v1.0"))
 
 

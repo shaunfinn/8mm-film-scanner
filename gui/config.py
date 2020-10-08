@@ -1,3 +1,5 @@
 
 run_motor= True
-print("config ", run_motor)
+trigger_cnt = 0
+capture = False
+frame_cnt = 0
