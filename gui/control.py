@@ -15,11 +15,6 @@ class testClass():
 
 class stepperControl():
     
-    def __init__(self):
-        super().__init__()
-    
-    motor_start = qtc.pyqtSignal()
-    
     
     def __init__(self):
         print("stepper init")

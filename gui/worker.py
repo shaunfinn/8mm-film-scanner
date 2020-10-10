@@ -7,9 +7,12 @@ from PyQt5 import QtGui as qtg
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import uic
 from test import testClass
+from control import stepperControl
 import camera
 
 cl =testClass()
+
+stepper = stepperControl()
 
 #worker for doing motor controls in a seperate thread
 class Worker(qtc.QObject):
@@ -19,7 +22,8 @@ class Worker(qtc.QObject):
 
     @qtc.pyqtSlot()
     def motorRunning(self):
-        cl.main_loop()
+        #cl.main_loop()
+        stepper.wind()
 
         
         #config.run_motor = True
@@ -37,8 +41,9 @@ class Worker(qtc.QObject):
     def start_capture(self):
         config.capture = True
         while config.capture:
-            cl.main_loop()
-            camera.grab_frame()
+            #cl.main_loop()
+            stepper.wind()
+            camera.capture_frame()
     
         
         

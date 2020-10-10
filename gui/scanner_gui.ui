@@ -184,7 +184,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QSlider" name="sl_motor">
+   <widget class="QSlider" name="sl_speed">
     <property name="geometry">
      <rect>
       <x>70</x>
@@ -254,7 +254,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QSlider" name="sl_motor_2">
+   <widget class="QSlider" name="sl_speed2">
     <property name="geometry">
      <rect>
       <x>540</x>
@@ -339,7 +339,7 @@
       <normaloff>imgs/stop.png</normaloff>imgs/stop.png</iconset>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="lcdNumber">
+   <widget class="QLCDNumber" name="lcd_frameCnt">
     <property name="geometry">
      <rect>
       <x>640</x>
@@ -418,7 +418,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QSlider" name="horizontalSlider">
+   <widget class="QSlider" name="sl_red">
     <property name="geometry">
      <rect>
       <x>299</x>
@@ -427,11 +427,23 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="minimum">
+     <number>-50</number>
+    </property>
+    <property name="maximum">
+     <number>50</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+    <property name="tracking">
+     <bool>true</bool>
+    </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QSlider" name="horizontalSlider_2">
+   <widget class="QSlider" name="sl_green">
     <property name="geometry">
      <rect>
       <x>300</x>
@@ -444,7 +456,7 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QSlider" name="horizontalSlider_3">
+   <widget class="QSlider" name="sl_blue">
     <property name="geometry">
      <rect>
       <x>300</x>
@@ -457,7 +469,7 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QSlider" name="horizontalSlider_4">
+   <widget class="QSlider" name="sl_exposure">
     <property name="geometry">
      <rect>
       <x>300</x>

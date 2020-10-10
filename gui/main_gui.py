@@ -3,7 +3,7 @@ from scanner_gui import Ui_MainWindow
 import camera
 #from config import run_motor
 import config
-from worker import Worker, stepperControl
+from worker import Worker
 
 from PyQt5 import QtCore as qtc
 from PyQt5 import QtGui as qtg
@@ -78,7 +78,7 @@ class MyWindow(qtw.QMainWindow):
         print("stop", config.run_motor)
         
     def m_reset(self):
-        print("motor_stopped signal")
+        print("reset")
         
     def m_triggerUpdate(self):
         if config.capture:
