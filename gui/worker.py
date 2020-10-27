@@ -33,6 +33,10 @@ class Worker(qtc.QObject):
         #print("while loop broken")
             
         self.motor_stopped.emit()
+    def rev(self):
+        stepper.rev()
+    def fwd(self):
+        stepper.fwd()
         
     def photo(self):
         #camera.grab_10_frames()
