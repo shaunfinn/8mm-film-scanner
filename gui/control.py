@@ -76,7 +76,7 @@ class stepperControl():
     reset_pin = 15
     pulse_pin = 17
     
-    pulse_freq = 1000     # fastest stepper motor 17HD can go without skipping pulses etc
+    pulse_freq = 1000     # 1000 fastest stepper motor 17HD can go without skipping pulses etc
     #stepper motor control pins
     dir_fwd = False
     half_pulse =.5/pulse_freq

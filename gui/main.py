@@ -1,6 +1,6 @@
 
 from scanner_gui import Ui_MainWindow
-import camera
+from camera import cameraControl
 #from config import run_motor
 import config
 from worker import Worker
@@ -36,7 +36,7 @@ GPIO.setup(trigger_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 GPIO.add_event_detect(trigger_pin, GPIO.RISING, callback=triggerUpdate, bouncetime=200)
 
-
+camera = cameraControl()
 
 class MyWindow(qtw.QMainWindow):
     
@@ -44,6 +44,8 @@ class MyWindow(qtw.QMainWindow):
     motor_frev = qtc.pyqtSignal()
     grabframes = qtc.pyqtSignal()
     capture_start = qtc.pyqtSignal()
+    capture_stop = qtc.pyqtSignal()
+    #capture_init = qtc.pyqtSignal()
     
     
     def __init__(self):
@@ -73,6 +75,8 @@ class MyWindow(qtw.QMainWindow):
         self.motor_start.connect(self.worker.motorRunning)
         self.motor_frev.connect(self.worker.rev)
         self.capture_start.connect(self.worker.start_capture)
+        self.capture_stop.connect(self.worker.stop_capture)
+     
         
          # Create a worker object and a thread
         self.worker2 = Worker()
@@ -131,6 +135,7 @@ class MyWindow(qtw.QMainWindow):
     def m_stopcap(self):
         config.capture = False
         config.run_motor = False
+        self.capture_stop.emit()
         print("stop capture")
 
 if __name__ == "__main__":
