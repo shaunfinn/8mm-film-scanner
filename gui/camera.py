@@ -2,6 +2,8 @@ import cv2
 import time
 import config
 
+
+
 class cameraControl():
 	
 	def init_capture(self):
@@ -34,16 +36,17 @@ class cameraControl():
 	def capture_frame(self):
 		#when capturing
 		return_value, image = self.camera.read()
-		config.frame_cnt +=1
 		self.out.write(image)
 		#cv2.imwrite('frames/'+str(config.frame_cnt)+'.png', image)
-		print("captured frame ", config.frame_cnt)
+		#print("captured frame ", config.frame_cnt)
 		
 	
 	def stop_capture(self):
 		self.camera.release()
 		self.out.release()
 		print("released")
+
+
 
 		
 	

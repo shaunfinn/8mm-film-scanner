@@ -6,32 +6,24 @@ from PyQt5 import QtCore as qtc
 from PyQt5 import QtGui as qtg
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import uic
-from test import testClass
 from control import stepperControl
 from camera import cameraControl
-
-cl =testClass()
+import time
 
 stepper = stepperControl()
 camera = cameraControl()
+fps =FPS.start()
 
 #worker for doing motor controls in a seperate thread
 class Worker(qtc.QObject):
     
     
     motor_stopped = qtc.pyqtSignal()
+    updateFps = qtc.pyqtSignal()
 
     @qtc.pyqtSlot()
     def motorRunning(self):
-        #cl.main_loop()
         stepper.wind()
-
-        
-        #config.run_motor = True
-        #while config.run_motor:
-        #    time.sleep(0.5)
-        #    print("motor running")
-        #print("while loop broken")
             
         self.motor_stopped.emit()
     def rev(self):
@@ -47,11 +39,17 @@ class Worker(qtc.QObject):
     def start_capture(self):
         camera.init_capture()
         camera.init_writer()
+        cnt = 0   #frame count
+        t_start = time.time()
         config.capture = True
         while config.capture:
-            #cl.main_loop()
             stepper.wind()
             camera.capture_frame()
+            cnt +=1
+            if cnt % 50 == 0:
+                fps = str(round(cnt/(time.time()-t_start ),1))
+                # print( "fps:", cnt / (time.time()-t_start ))
+                self.updateFps.emit(fps)
     
     @qtc.pyqtSlot()  
     def stop_capture(self):

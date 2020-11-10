@@ -88,6 +88,7 @@ class MyWindow(qtw.QMainWindow):
         self.worker.motor_stopped.connect(self.m_reset)
         
         self.grabframes.connect(self.worker2.photo)
+        self.worker2.updateFps.connect(self.setFps)
         #self.stepper.motor_start.connect(self.worker.motorRunning)
        
         
@@ -137,6 +138,10 @@ class MyWindow(qtw.QMainWindow):
         config.run_motor = False
         self.capture_stop.emit()
         print("stop capture")
+
+    @pyqtSlot(str)
+    def setFps(self, fps):
+        self.l_fps.setText(fps)
 
 if __name__ == "__main__":
     app = qtw.QApplication([])
