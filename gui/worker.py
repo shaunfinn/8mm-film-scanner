@@ -1,43 +1,42 @@
 #from config import run_motor
 import time
 import config
+import cv2
 
 from PyQt5 import QtCore as qtc
 from PyQt5 import QtGui as qtg
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import uic
-from test import testClass
 from control import stepperControl
 from camera import cameraControl
+import time
 
-cl =testClass()
+
 
 stepper = stepperControl()
 camera = cameraControl()
+
 
 #worker for doing motor controls in a seperate thread
 class Worker(qtc.QObject):
     
     
     motor_stopped = qtc.pyqtSignal()
+    updateFps = qtc.pyqtSignal(str)
+    updateStream = qtc.pyqtSignal(qtg.QImage)
+ 
 
     @qtc.pyqtSlot()
     def motorRunning(self):
-        #cl.main_loop()
         stepper.wind()
-
-        
-        #config.run_motor = True
-        #while config.run_motor:
-        #    time.sleep(0.5)
-        #    print("motor running")
-        #print("while loop broken")
             
         self.motor_stopped.emit()
     def rev(self):
         stepper.rev()
     def fwd(self):
         stepper.fwd()
+    def sleep(self):
+        stepper.sleep()
         
     def photo(self):
         #camera.grab_10_frames()
@@ -47,15 +46,37 @@ class Worker(qtc.QObject):
     def start_capture(self):
         camera.init_capture()
         camera.init_writer()
+        cnt = 0   #frame count
+        t_start = time.time()
         config.capture = True
         while config.capture:
-            #cl.main_loop()
             stepper.wind()
             camera.capture_frame()
+            cnt +=1
+            if cnt % 50 == 0:
+                fps = str(round(cnt/(time.time()-t_start ),1))
+                # print( "fps:", cnt / (time.time()-t_start ))
+                self.updateFps.emit(fps)
     
     @qtc.pyqtSlot()  
     def stop_capture(self):
         camera.stop_capture()
+        
+        
+    def stream(self):
+        camera.init_capture()
+        config.stream =True
+        while config.stream:
+            frame = camera.get_frame()
+            rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            h, w, ch = rgbImage.shape
+            bytesPerLine = ch * w
+            convertToQtFormat = qtg.QImage(rgbImage.data, w, h, bytesPerLine, qtg.QImage.Format_RGB888)
+            p = convertToQtFormat.scaled(640, 480, qtc.Qt.KeepAspectRatio)
+            self.updateStream.emit(p)
+            
+
+        
 
         
     

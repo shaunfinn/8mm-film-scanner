@@ -40,12 +40,13 @@ camera = cameraControl()
 
 class MyWindow(qtw.QMainWindow):
     
-    motor_start = qtc.pyqtSignal()
-    motor_frev = qtc.pyqtSignal()
+    motor_fwd = qtc.pyqtSignal()
+    motor_rev = qtc.pyqtSignal()
     grabframes = qtc.pyqtSignal()
     capture_start = qtc.pyqtSignal()
     capture_stop = qtc.pyqtSignal()
     #capture_init = qtc.pyqtSignal()
+    stream_start = qtc.pyqtSignal()
     
     
     def __init__(self):
@@ -53,7 +54,7 @@ class MyWindow(qtw.QMainWindow):
         uic.loadUi('scanner_gui.ui', self)
         #self.show()
         
-        self.b_preview.clicked.connect(self.m_preview)
+        self.b_preview.clicked.connect(self.m_stream)
         self.b_ffwd.clicked.connect(self.m_ffwd)
         self.b_frev.clicked.connect(self.m_frev)
         self.b_stop.clicked.connect(self.m_stop)
@@ -72,8 +73,8 @@ class MyWindow(qtw.QMainWindow):
         # Connect signals & slots AFTER moving the object to the thread
         self.worker.motor_stopped.connect(self.m_reset)
         #self.motor_start.connect(self.worker.fwd)
-        self.motor_start.connect(self.worker.motorRunning)
-        self.motor_frev.connect(self.worker.rev)
+        self.motor_fwd.connect(self.worker.fwd)
+        self.motor_rev.connect(self.worker.rev)
         self.capture_start.connect(self.worker.start_capture)
         self.capture_stop.connect(self.worker.stop_capture)
      
@@ -88,24 +89,30 @@ class MyWindow(qtw.QMainWindow):
         self.worker.motor_stopped.connect(self.m_reset)
         
         self.grabframes.connect(self.worker2.photo)
+        self.worker2.updateFps.connect(self.setFps)
+        self.worker2.updateStream.connect(self.updateStream)
         #self.stepper.motor_start.connect(self.worker.motorRunning)
+        
+        self.stream_start.connect(self.worker2.stream)
        
         
-    def m_preview(self):
-        camera.preview_frame()
-        #self.grabframes.emit()
-        self.l_img.setPixmap(qtg.QPixmap("preview.png"))
-        
+    def m_stream(self):
+        if config.stream:
+            config.stream = False
+        else:
+            self.stream_start.emit()
+        #self.l_img.setPixmap(qtg.QPixmap("preview.png"))
+   
     
     def m_ffwd(self):
         print("m_fwd")
-        self.motor_start.emit()
+        self.motor_fwd.emit()
         
         #self.stepper.windFrame()
         #self.motor_start.emit()
     def m_frev(self):
         print("m_frev")
-        self.motor_frev.emit()
+        self.motor_rev.emit()
     
     
     def m_stop(self):
@@ -137,6 +144,15 @@ class MyWindow(qtw.QMainWindow):
         config.run_motor = False
         self.capture_stop.emit()
         print("stop capture")
+    
+
+    @qtc.pyqtSlot(str) 
+    def setFps(self, fps):
+        self.l_fps.setText(fps)
+        
+    @qtc.pyqtSlot(qtg.QImage)
+    def updateStream(self, img):
+        self.l_img.setPixmap(qtg.QPixmap.fromImage(img))
 
 if __name__ == "__main__":
     app = qtw.QApplication([])

@@ -2,12 +2,19 @@ import cv2
 import time
 import config
 
+
+
 class cameraControl():
 	
 	def init_capture(self):
 		self.camera = cv2.VideoCapture(0)
-		self.camera.set(3,1920)
-		self.camera.set(4,1080)
+		
+		if config.stream:
+			self.camera.set(3,640)
+			self.camera.set(4,480)
+		else:
+			self.camera.set(3,1920)
+			self.camera.set(4,1080)
 		
 	def init_writer(self):
 		fourcc = cv2.VideoWriter_fourcc(*'FFV1')
@@ -34,16 +41,21 @@ class cameraControl():
 	def capture_frame(self):
 		#when capturing
 		return_value, image = self.camera.read()
-		config.frame_cnt +=1
 		self.out.write(image)
 		#cv2.imwrite('frames/'+str(config.frame_cnt)+'.png', image)
-		print("captured frame ", config.frame_cnt)
+		#print("captured frame ", config.frame_cnt)
+		
+	def get_frame(self):
+		return_value, image = self.camera.read()
+		return image
 		
 	
 	def stop_capture(self):
 		self.camera.release()
 		self.out.release()
 		print("released")
+
+
 
 		
 	

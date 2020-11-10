@@ -4,71 +4,11 @@ import RPi.GPIO as GPIO
 
 
 
-class testClass():
-    def main_loop(self):
-        config.run_motor = True
-        while config.run_motor:
-            time.sleep(0.5)
-            print("motor running")
-        print("while loop broken")
-
-
 
 class stepperControl():
     
-    
-    # def __init__(self):
-        # print("stepper init")
-
-
-    # def wake(self):
-        # print("stepper wake")
-
-    # def sleep(self):
-        # print("stepper sleep")
-    
-
-    # def fwdFrame(self, num=1, speed=100):
-        # self.wake()
-        # self.windFrame(num)
-        # self.sleep()
-
-    # def windFrame(self, num=1, speed=100):
-        # print("stepper winding")
-        # #self.motor_start.emit()
-        # #send signal to worker
- 
-    # def revFrame(self, num=1, speed=100):  #winds back one more than necessary, then forward to properly frame
-        # self.wake()
-        # #change dir
-        # self.windFrame(num)
-        # #change dir
-        # self.sleep()
-        
-    # # continuous operation
-        
-    # def wind(self): # wind continuously until false flag, then sleep motor
-        # config.run_motor = True
-        # while config.run_motor:
-            # time.sleep(0.5)
-            # print("motor running")
-        # print("motor stopped")
-    
-    # def fwd(self):
-        # self.wake()
-        # self.wind()
-        # self.sleep()
-    
-    # def rev(self):
-        # self.wake()
-        # #change dir
-        # self.wind()
-        # #change dir
-        # self.sleep()
-        
-			
-        
-     	#initialise pins
+  
+    #initialise pins
     dir_pin = 18
     ms1_pin = 22
     ms2_pin = 23
@@ -83,21 +23,21 @@ class stepperControl():
     steps_per_rev = 400 # 1 rev at quickest setting, where MS1 & MS2 = Low
     
     def __init__(self):
-								print("motor init")
-								GPIO.setmode(GPIO.BCM)
-								GPIO.setup(self.dir_pin, GPIO.OUT)
-								GPIO.setup(self.pulse_pin, GPIO.OUT)
-								GPIO.setup(self.ms1_pin, GPIO.OUT)
-								GPIO.setup(self.ms2_pin, GPIO.OUT)
-								GPIO.setup(self.sleep_pin, GPIO.OUT)
-								GPIO.setup(self.reset_pin, GPIO.OUT)
-								GPIO.output(self.dir_pin, self.dir_fwd)
-								GPIO.output(self.pulse_pin, False)
-								GPIO.output(self.ms1_pin, False)
-								GPIO.output(self.ms2_pin, False)
-								GPIO.output(self.sleep_pin, True)
-								GPIO.output(self.reset_pin, True)
-								#self.pwm = GPIO.PWM(self.pulse_pin, self.pulse_freq)
+        print("motor init")
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.dir_pin, GPIO.OUT)
+        GPIO.setup(self.pulse_pin, GPIO.OUT)
+        GPIO.setup(self.ms1_pin, GPIO.OUT)
+        GPIO.setup(self.ms2_pin, GPIO.OUT)
+        GPIO.setup(self.sleep_pin, GPIO.OUT)
+        GPIO.setup(self.reset_pin, GPIO.OUT)
+        GPIO.output(self.dir_pin, self.dir_fwd)
+        GPIO.output(self.pulse_pin, False)
+        GPIO.output(self.ms1_pin, False)
+        GPIO.output(self.ms2_pin, False)
+        GPIO.output(self.sleep_pin, True)
+        GPIO.output(self.reset_pin, True)
+        #self.pwm = GPIO.PWM(self.pulse_pin, self.pulse_freq)
 
     def wake(self):
         GPIO.output(self.sleep_pin, True)
@@ -134,23 +74,21 @@ class stepperControl():
         self.sleep()   
         
         
-        # continuous operation
+    # continuous operation
         
     def wind(self): # wind continuously until false flag, then sleep motor
         config.run_motor = True
         pin=self.pulse_pin  #directly accessing for speed
         hp=self.half_pulse
-        print("motor main loop")
+        #print("motor main loop")
         while config.run_motor:
-												GPIO.output(pin, True) #used instead of variable for speed
-												time.sleep(hp) #again, directly entring num for speed
-												GPIO.output(pin, False) #used instead of variable for speed
-												time.sleep(hp)
+            GPIO.output(pin, True) #used instead of variable for speed
+            time.sleep(hp) #again, directly entring num for speed
+            GPIO.output(pin, False) #used instead of variable for speed
+            time.sleep(hp)
 
-        print("motor stopped")
-       	
-            
-    
+        #print("motor stopped")
+
     def fwd(self):
         self.wake()
         self.wind()
