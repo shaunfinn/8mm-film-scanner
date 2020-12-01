@@ -10,11 +10,15 @@ from PyQt5 import uic
 from control import stepperControl
 from camera import cameraControl
 import time
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> fa6aa4c299f779a2aa1fe3d11f819af12fc3e20a
 
 stepper = stepperControl()
 camera = cameraControl()
+fps =FPS.start()
 
 
 #worker for doing motor controls in a seperate thread
@@ -22,9 +26,13 @@ class Worker(qtc.QObject):
     
     
     motor_stopped = qtc.pyqtSignal()
+<<<<<<< HEAD
     updateFps = qtc.pyqtSignal(str)
     updateStream = qtc.pyqtSignal(qtg.QImage)
  
+=======
+    updateFps = qtc.pyqtSignal()
+>>>>>>> fa6aa4c299f779a2aa1fe3d11f819af12fc3e20a
 
     @qtc.pyqtSlot()
     def motorRunning(self):
@@ -53,10 +61,17 @@ class Worker(qtc.QObject):
             stepper.wind()
             camera.capture_frame()
             cnt +=1
+<<<<<<< HEAD
             if cnt % 1000 == 0:
                 fps = str(round(cnt/(time.time()-t_start ),1))
                 print( "fps:", cnt / (time.time()-t_start ))
                 #self.updateFps.emit(fps)
+=======
+            if cnt % 50 == 0:
+                fps = str(round(cnt/(time.time()-t_start ),1))
+                # print( "fps:", cnt / (time.time()-t_start ))
+                self.updateFps.emit(fps)
+>>>>>>> fa6aa4c299f779a2aa1fe3d11f819af12fc3e20a
     
     @qtc.pyqtSlot()  
     def stop_capture(self):

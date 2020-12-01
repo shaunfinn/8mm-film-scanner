@@ -44,10 +44,13 @@ class cameraControl():
 		self.out.write(image)
 		#cv2.imwrite('frames/'+str(config.frame_cnt)+'.png', image)
 		#print("captured frame ", config.frame_cnt)
+<<<<<<< HEAD
 		
 	def get_frame(self):
 		return_value, image = self.camera.read()
 		return image
+=======
+>>>>>>> fa6aa4c299f779a2aa1fe3d11f819af12fc3e20a
 		
 	
 	def stop_capture(self):
@@ -58,6 +61,8 @@ class cameraControl():
 	def stop_stream(self):
 		self.camera.release()
 		print("released")
+
+
 
 
 

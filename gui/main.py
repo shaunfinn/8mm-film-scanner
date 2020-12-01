@@ -97,8 +97,12 @@ class MyWindow(qtw.QMainWindow):
         self.worker.motor_stopped.connect(self.m_reset)
         
         self.grabframes.connect(self.worker2.photo)
+<<<<<<< HEAD
         
         self.worker2.updateStream.connect(self.updateStream)
+=======
+        self.worker2.updateFps.connect(self.setFps)
+>>>>>>> fa6aa4c299f779a2aa1fe3d11f819af12fc3e20a
         #self.stepper.motor_start.connect(self.worker.motorRunning)
         
         self.stream_start.connect(self.worker2.stream)
@@ -160,6 +164,10 @@ class MyWindow(qtw.QMainWindow):
     @qtc.pyqtSlot(qtg.QImage)
     def updateStream(self, img):
         self.l_img.setPixmap(qtg.QPixmap.fromImage(img))
+
+    @pyqtSlot(str)
+    def setFps(self, fps):
+        self.l_fps.setText(fps)
 
 if __name__ == "__main__":
     app = qtw.QApplication([])
