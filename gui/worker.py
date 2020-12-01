@@ -53,10 +53,10 @@ class Worker(qtc.QObject):
             stepper.wind()
             camera.capture_frame()
             cnt +=1
-            if cnt % 50 == 0:
+            if cnt % 1000 == 0:
                 fps = str(round(cnt/(time.time()-t_start ),1))
-                # print( "fps:", cnt / (time.time()-t_start ))
-                self.updateFps.emit(fps)
+                print( "fps:", cnt / (time.time()-t_start ))
+                #self.updateFps.emit(fps)
     
     @qtc.pyqtSlot()  
     def stop_capture(self):
@@ -74,6 +74,7 @@ class Worker(qtc.QObject):
             convertToQtFormat = qtg.QImage(rgbImage.data, w, h, bytesPerLine, qtg.QImage.Format_RGB888)
             p = convertToQtFormat.scaled(640, 480, qtc.Qt.KeepAspectRatio)
             self.updateStream.emit(p)
+        camera.stop_stream()
             
 
         

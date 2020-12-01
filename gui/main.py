@@ -11,13 +11,19 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import uic
 import time
 import RPi.GPIO as GPIO
+from capture_video import cap_v4l2
 
 #uncomment for capture per detetcion 
 def triggerUpdate(channel):
 	if config.capture:
 		#delay before stopping motor, so trigger passes gate completely
-		time.sleep(0.25)
+		time.sleep(0.15)
 		config.run_motor = False
+		
+def triggerUpdate2(channel):    #for fps test only
+		#delay before stopping motor, so trigger passes gate completely
+		config.trigger_cnt+=1
+
 
 #uncomment for capture per 3 detections 
 # def triggerUpdate(channel):
@@ -34,7 +40,7 @@ trigger_pin = 14
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(trigger_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-GPIO.add_event_detect(trigger_pin, GPIO.RISING, callback=triggerUpdate, bouncetime=200)
+GPIO.add_event_detect(trigger_pin, GPIO.RISING, callback=triggerUpdate2, bouncetime=100)
 
 camera = cameraControl()
 
@@ -54,6 +60,7 @@ class MyWindow(qtw.QMainWindow):
         uic.loadUi('scanner_gui.ui', self)
         #self.show()
         
+        self.b_preview.clicked.connect(self.m_stream)
         self.b_preview.clicked.connect(self.m_stream)
         self.b_ffwd.clicked.connect(self.m_ffwd)
         self.b_frev.clicked.connect(self.m_frev)
@@ -77,6 +84,7 @@ class MyWindow(qtw.QMainWindow):
         self.motor_rev.connect(self.worker.rev)
         self.capture_start.connect(self.worker.start_capture)
         self.capture_stop.connect(self.worker.stop_capture)
+        self.worker.updateFps.connect(self.setFps)
      
         
          # Create a worker object and a thread
@@ -89,7 +97,7 @@ class MyWindow(qtw.QMainWindow):
         self.worker.motor_stopped.connect(self.m_reset)
         
         self.grabframes.connect(self.worker2.photo)
-        self.worker2.updateFps.connect(self.setFps)
+        
         self.worker2.updateStream.connect(self.updateStream)
         #self.stepper.motor_start.connect(self.worker.motorRunning)
         
@@ -106,6 +114,10 @@ class MyWindow(qtw.QMainWindow):
     
     def m_ffwd(self):
         print("m_fwd")
+        config.capture_start = time.time()
+        config.trigger_cnt = 0
+        #cap = cap_v4l2()  #test for capture 
+        #cap.start()
         self.motor_fwd.emit()
         
         #self.stepper.windFrame()
@@ -118,21 +130,12 @@ class MyWindow(qtw.QMainWindow):
     def m_stop(self):
         #global run_motor
         config.run_motor = False
+        config.capture = False
         print("stop", config.run_motor)
+        print("revs per s motor: ", (config.trigger_cnt/(time.time() -config.capture_start)))
         
     def m_reset(self):
         print("reset")
-        
-    def m_triggerUpdate(self):
-        if config.capture:
-            config.trigger_cnt +=1
-            print("trigger cnt ", config.trigger_cnt) 
-            if config.trigger_cnt >= 3:
-                #stop motor, take photo
-                config.trigger_cnt=0
-                config.run_motor = False
-                    
-
         
     def m_startcap(self):
         config.capture = True
@@ -144,10 +147,14 @@ class MyWindow(qtw.QMainWindow):
         config.run_motor = False
         self.capture_stop.emit()
         print("stop capture")
+        
+    def m_triggerUpdate(self):
+        print("nada")
     
 
     @qtc.pyqtSlot(str) 
     def setFps(self, fps):
+        print("set fps")
         self.l_fps.setText(fps)
         
     @qtc.pyqtSlot(qtg.QImage)

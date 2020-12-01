@@ -54,6 +54,10 @@ class cameraControl():
 		self.camera.release()
 		self.out.release()
 		print("released")
+		
+	def stop_stream(self):
+		self.camera.release()
+		print("released")
 
 
 
