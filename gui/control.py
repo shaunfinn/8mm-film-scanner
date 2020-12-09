@@ -1,11 +1,13 @@
 import config
 import time 
 import RPi.GPIO as GPIO
+from camera import CameraOpenCV, FPS
+from threading import Thread
 
 
 
 
-class stepperControl():
+class StepperCtrl():
     
   
     #initialise pins
@@ -103,8 +105,61 @@ class stepperControl():
         
  
         
+class Capture:   #streamsandwrites - 1 thread
+    def __init__(self, win, stepper threading=True, fps_update=50):
+        # initialize the video camera
+        self.camera =  CameraOpenCV(win=win,write=True)
+        #self.stepper = StepperCtrl()
+        self.stepper = stepper
+        self.threading = threading
+        self.fps_update = fps_update  # update fps on gui every x frames
 
 
-             
- 
+    def start(self):
+        # start the thread to read frames from the video stream
+        if self.threading:
+            Thread(target=self.loop, args=(), daemon=True).start()
+        else:
+            self.loop()
+        return self
+
+    def loop(self):
+        # keep looping infinitely until the thread is stopped
+        fps = FPS().start()
+        cnt =0   #frame count local
+        fps_update = self.fps_update
+        while config.capture:
+            self.stepper.wind()     #winds until congif
+            self.camera.capture_frame()
+            cnt += 1
+            fps.update()
+
+            if cnt % fps_update == 0:
+                fps.stop()
+                self.win.setFps(str(round(fps.fps(), 1)))
+                fps = FPS().start() #restart fps
+        self.camera.release()
+
+    def stop(self):
+        config.capture = False
+
+
+class Stream:
+    def __init__(self, win, threading=True):
+        # initialize the video camera
+        self.camera = CameraOpenCV(win=win, stream_only=True)
+
+        #self.fps_update = fps_update  # update fps on gui every x frames
+
+    def start(self):
+        # start the thread to read frames from the video stream
+        if self.threading:
+            Thread(target=self.camera.stream(), args=(), daemon=True).start()
+        else:
+            self.camera.stream
+        return self
+
+
+
+
 
