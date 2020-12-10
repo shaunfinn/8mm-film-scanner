@@ -3,8 +3,7 @@ import time
 import RPi.GPIO as GPIO
 from camera import CameraOpenCV, FPS
 from threading import Thread
-
-
+from imutil import FPS
 
 
 class StepperCtrl():
@@ -37,7 +36,7 @@ class StepperCtrl():
         GPIO.output(self.pulse_pin, False)
         GPIO.output(self.ms1_pin, False)
         GPIO.output(self.ms2_pin, False)
-        GPIO.output(self.sleep_pin, True)
+        GPIO.output(self.sleep_pin, False)
         GPIO.output(self.reset_pin, True)
         #self.pwm = GPIO.PWM(self.pulse_pin, self.pulse_freq)
 
@@ -78,35 +77,37 @@ class StepperCtrl():
         
     # continuous operation
         
-    def wind(self): # wind continuously until false flag, then sleep motor
-        config.run_motor = True
-        pin=self.pulse_pin  #directly accessing for speed
-        hp=self.half_pulse
-        #print("motor main loop")
-        while config.run_motor:
-            GPIO.output(pin, True) #used instead of variable for speed
-            time.sleep(hp) #again, directly entring num for speed
-            GPIO.output(pin, False) #used instead of variable for speed
-            time.sleep(hp)
-
-        #print("motor stopped")
+    def wind(self, thread=False): # wind continuously until false flag, then sleep motor
+        if thread:
+            # start thread and call self
+            Thread(target=self.wind, args=(), daemon=True).start()
+        else:
+            config.motor_running = True
+            pin=self.pulse_pin  #directly accessing for speed
+            hp=self.half_pulse
+            #print("motor main loop")
+            while config.motor_running:
+                GPIO.output(pin, True) #used instead of variable for speed
+                time.sleep(hp) #again, directly entring num for speed
+                GPIO.output(pin, False) #used instead of variable for speed
+                time.sleep(hp)
 
     def fwd(self):
         self.wake()
-        self.wind()
+        self.wind(thread=True)
         self.sleep()
     
     def rev(self):
         self.wake()
         GPIO.output(self.dir_pin, not self.dir_fwd) #change dir
-        self.wind()
+        self.wind(thread=True)
         GPIO.output(self.dir_pin, self.dir_fwd) #change dir
         self.sleep()
         
  
         
 class Capture:   #streamsandwrites - 1 thread
-    def __init__(self, win, stepper threading=True, fps_update=50):
+    def __init__(self, win, stepper, threading=True, fps_update=50):
         # initialize the video camera
         self.camera =  CameraOpenCV(win=win,write=True)
         #self.stepper = StepperCtrl()

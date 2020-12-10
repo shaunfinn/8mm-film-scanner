@@ -1,6 +1,4 @@
 
-from scanner_gui import Ui_MainWindow
-from camera import cameraControl
 import config
 
 #from PyQt5 import QtCore as qtc
@@ -17,11 +15,6 @@ def triggerUpdate(channel):
 		#delay before stopping motor, so trigger passes gate completely
 		time.sleep(0.15)
 		config.motor_running = False
-		
-# def triggerUpdate2(channel):    #for fps test only
-# 		#delay before stopping motor, so trigger passes gate completely
-# 		config.trigger_cnt+=1
-
 
 # setup trigger pin
 trigger_pin = 14
@@ -41,7 +34,6 @@ class MyWindow(QMainWindow):
         self.b_ffwd.clicked.connect(self.m_ffwd)
         self.b_frev.clicked.connect(self.m_frev)
         self.b_stop.clicked.connect(self.m_stop)
-        self.b_triggerDummy.clicked.connect(self.m_triggerUpdate)
         self.b_startcap.clicked.connect(self.m_startcap)
         self.b_stopcap.clicked.connect(self.m_stopcap)
 
@@ -86,10 +78,7 @@ class MyWindow(QMainWindow):
         config.capture = False
         config.motor_running = False
         print("stop capture")
-        
-    def m_triggerUpdate(self):
-        print("nada")
-    
+
 
     #@qtc.pyqtSlot(str)
     def setFps(self, fps):

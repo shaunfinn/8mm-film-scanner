@@ -4,8 +4,10 @@ import config
 
 from PyQt5.QtGui import QImage
 from PyQt5.QtCore import  Qt
-from control import Capture, Stream, StepperCtrl
-from capture_video import cap_v4l2
+import select
+import v4l2capture
+
+
 
 
 class CameraOpenCV:
@@ -38,18 +40,12 @@ class CameraOpenCV:
 		if config.stream:
 			self.stream_frame(frame)
 
-
 	def stream(self):
 		#stream only,
 		while config.stream:
 			return_value, frame = self.camera.read()
 			self.stream_frame(frame)
 		self.release()
-
-	def read(self):
-		return_value, frame = self.camera.read()
-		return frame
-
 
 	def stream_frame(self, frame):
 		#displays frame in gui window
@@ -70,36 +66,72 @@ class CameraOpenCV:
 			print("video released")
 
 
+class CameraV4L2:
+	def __init__(self, win, src=0, stream_only=False, write=False):
+		# Open the video device.
+		self.video = v4l2capture.Video_device("/dev/video0")
 
-class FPS:
-    def __init__(self):
-        # store the start time, end time and total number of frames
-        # that were examined between the start and end intervals
-        self._start = None
-        self._end = None
-        self._numFrames = 0
+		# Suggest an image size to the device. The device may choose and
+		# return another size if it doesn't support the suggested one.
+		self.size_x, self.size_y = self.video.set_format(1920, 1080, fourcc='FFV1')
+		self.video.set_fps(60)
 
-    def start(self):
-        # start the timer
-        self._start = datetime.datetime.now()
-        return self
+		# Create a buffer to store image data in. This must be done before
+		# calling 'start' if v4l2capture is compiled with libv4l2. Otherwise
+		# raises IOError.
+		self.video.create_buffers(30)
 
-    def stop(self):
-        # stop the timer
-        self._end = datetime.datetime.now()
+		# Send the buffer to the device. Some devices require this to be done
+		# before calling 'start'.
+		self.video.queue_all_buffers()
 
-    def update(self):
-        # increment the total number of frames examined during the
-        # start and end intervals
-        self._numFrames += 1
+		# Start the device. This lights the LED if it's a camera that has one.
+		self.video.start()
 
-    def elapsed(self):
-        # return the total number of seconds between the start and
-        # end interval
-        return (self._end - self._start).total_seconds()
+		if stream_only:
+			# lower resolution if only streaming
+			self.size_x, self.size_y = self.video.set_format(640, 480, fourcc='FFV1')
+		else:
+			# set to maximum resolution
+			self.size_x, self.size_y = self.video.set_format(1920, 1080, fourcc='FFV1')
 
-    def fps(self):
-        # compute the (approximate) frames per second
-        return self._numFrames / self.elapsed()
-		
-	
+		if write:
+			fourcc = cv2.VideoWriter_fourcc(*'FFV1')
+			self.out = cv2.VideoWriter('output.avi', fourcc, 24.0, self.res)
+
+	def capture_frame(self):
+		# when capturing
+		return_value, frame = self.camera.read()
+		self.out.write(frame)
+
+		if config.stream:
+			self.stream_frame(frame)
+
+	def stream(self):
+		# stream only,
+		while config.stream:
+			return_value, frame = self.camera.read()
+			self.stream_frame(frame)
+		self.release()
+
+	def read(self):
+		return_value, frame = self.camera.read()
+		return frame
+
+	def stream_frame(self, frame):
+		# displays frame in gui window
+		rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+		h, w, ch = rgbImage.shape
+		bytesPerLine = ch * w
+		convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
+		img = convertToQtFormat.scaled(640, 480, Qt.KeepAspectRatio)
+		self.win.updateStream(img)
+
+		return image
+
+	def release(self):
+		self.camera.release()
+		print("camera released")
+		if write:
+			self.out.release()
+			print("video released")
