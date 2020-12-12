@@ -1,5 +1,5 @@
 
-motor_running= True
+motor_running= False
 trigger_cnt = 0
 capture = False
 frame_cnt = 0

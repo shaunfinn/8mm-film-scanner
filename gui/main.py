@@ -1,4 +1,5 @@
 
+from scanner_gui import Ui_MainWindow
 import config
 
 #from PyQt5 import QtCore as qtc
@@ -7,21 +8,28 @@ from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.uic import loadUi
 import time
 import RPi.GPIO as GPIO
+from control import StepperCtrl, Stream, Capture
+
+config.motor_running= False
+config.trigger_cnt = 0
+config.capture = False
+config.stream =False
 
 
 #uncomment for capture per detetcion 
 def triggerUpdate(channel):
 	if config.capture:
 		#delay before stopping motor, so trigger passes gate completely
-		time.sleep(0.15)
+		time.sleep(0.1)   # value for 8000 pulse freq
 		config.motor_running = False
+
 
 # setup trigger pin
 trigger_pin = 14
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(trigger_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-GPIO.add_event_detect(trigger_pin, GPIO.RISING, callback=triggerUpdate, bouncetime=100)
+GPIO.add_event_detect(trigger_pin, GPIO.RISING, callback=triggerUpdate, bouncetime=200)
 
 class MyWindow(QMainWindow):
     
@@ -34,11 +42,11 @@ class MyWindow(QMainWindow):
         self.b_ffwd.clicked.connect(self.m_ffwd)
         self.b_frev.clicked.connect(self.m_frev)
         self.b_stop.clicked.connect(self.m_stop)
+        self.b_triggerDummy.clicked.connect(self.m_triggerUpdate)
         self.b_startcap.clicked.connect(self.m_startcap)
         self.b_stopcap.clicked.connect(self.m_stopcap)
 
-        self.stepper = StepperCtrl()   # intialise stepper
-
+        self.stepper = StepperCtrl()  
         
     def m_stream(self):
         # toggle stream boolean
@@ -52,7 +60,8 @@ class MyWindow(QMainWindow):
     def m_ffwd(self):
         print("m_fwd")
         if not config.capture:
-            self.stepper.fwd()
+            self.stepper.start_thread()
+            #self.stepper.fwd()
         
         #self.stepper.windFrame()
         #self.motor_start.emit()
@@ -78,7 +87,10 @@ class MyWindow(QMainWindow):
         config.capture = False
         config.motor_running = False
         print("stop capture")
-
+        
+    def m_triggerUpdate(self):
+        print("nada")
+    
 
     #@qtc.pyqtSlot(str)
     def setFps(self, fps):

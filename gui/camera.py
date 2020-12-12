@@ -12,6 +12,7 @@ import v4l2capture
 
 class CameraOpenCV:
 	def __init__(self, win, src=0, stream_only=False, write=False):
+		self.win =win
 		self.camera = cv2.VideoCapture(src)
 		
 		if stream_only:
@@ -56,8 +57,6 @@ class CameraOpenCV:
 		img = convertToQtFormat.scaled(640, 480, Qt.KeepAspectRatio)
 		self.win.updateStream(img)
 
-		return image
-	
 	def release(self):
 		self.camera.release()
 		print("camera released")

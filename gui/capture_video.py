@@ -28,8 +28,9 @@ class cap_v4l2():
 
         # Suggest an image size to the device. The device may choose and
         # return another size if it doesn't support the suggested one.
-        self.size_x, self.size_y = self.video.set_format(1920, 1080, fourcc='FFV1')
-        self.video.set_fps(60)
+        #self.size_x, self.size_y = self.video.set_format(3072, 2048, fourcc='FFV1')
+        self.size_x, self.size_y = self.video.set_format(1920,1080 , fourcc='FFV1')
+        self.video.set_fps(30)
 
         # Create a buffer to store image data in. This must be done before
         # calling 'start' if v4l2capture is compiled with libv4l2. Otherwise
@@ -62,3 +63,6 @@ class cap_v4l2():
         video.close()
         print("Saved video.mjpg (Size: " + str(self.size_x) + " x " + str(self.size_y) + ")")
         print("fps: ",fps.fps())
+        
+c = cap_v4l2()
+c.start()
