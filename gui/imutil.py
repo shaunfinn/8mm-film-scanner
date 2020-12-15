@@ -1,5 +1,6 @@
 # import the necessary packages
 import datetime
+import time
 from threading import Thread
 import cv2
 
@@ -10,6 +11,7 @@ class FPS:
         self._start = None
         self._end = None
         self._numFrames = 0
+        self.t =0.0    # time frame is grabbed
 
     def start(self):
         # start the timer
@@ -35,6 +37,7 @@ class FPS:
         return self._numFrames / self.elapsed()
 
 class WebCamVideoStream:
+    #constantly captures frames
     def __init__(self, src=0):
         # initialize the video camera stream and read the first frame 
         # from the stream
@@ -43,7 +46,8 @@ class WebCamVideoStream:
         #set resolution to maximum
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 10000)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 10000)
-
+        
+        self.t = time.time()
         (self.grabbed, self.frame) = self.stream.read()
         
 
@@ -53,10 +57,11 @@ class WebCamVideoStream:
 
     def start(self):
         # start the thread to read frames from the video stream
-        Thread(target=self.update, args=()).start()
+        Thread(target=self.update, args=(), daemon=True).start()
         return self
 
     def update(self):
+        self.fps = FPS().start()
         # keep looping infinitely until the thread is stopped
         while True:
             # if the thread indicator variable is set, stop the thread
@@ -64,6 +69,9 @@ class WebCamVideoStream:
                 return
             # otherwise read the next frame from the stream
             (self.grabbed, self.frame) = self.stream.read()
+            self.t = time.time()
+            self.fps.update()
+            #print("WebCamVideoStream")
             
     def getres(self):
         width = int(self.stream.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -71,11 +79,16 @@ class WebCamVideoStream:
         
         return (width, height)
         
+    def get_fps(self):
+        self.fps.stop()
+        return self.fps.fps()
+        
 
-    def read(self):
+    def grab_frame(self):
         # return the frame most recently read
-        return self.frame
+        return self.grabbed,self.frame, self.t
 
     def stop(self):
         # indicate that the thread should be stopped
         self.stopped = True
+        self.stream.release()

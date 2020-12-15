@@ -3,7 +3,11 @@ import time
 import RPi.GPIO as GPIO
 from camera import CameraOpenCV
 from threading import Thread
-from imutil import FPS
+from imutil import FPS, WebCamVideoStream
+
+from PyQt5.QtGui import QImage
+from PyQt5.QtCore import  Qt
+import cv2
 
 
 
@@ -19,7 +23,7 @@ class StepperCtrl():
     reset_pin = 15
     pulse_pin = 17
     
-    pulse_freq = 200    # 1000 about the fastest ok
+    pulse_freq = 1000    # 1000 about the fastest ok
     #stepper motor control pins
     dir_fwd = False
     half_pulse =.5/pulse_freq
@@ -60,14 +64,14 @@ class StepperCtrl():
         self.windFrame(num)
         self.sleep()
 
-    def windFrame(self, num=1, speed=100):
+    def windFrame(self, num=1, speed=100, fwd =True):
         pin=self.pulse_pin  #directly accessing for speed
         hp=self.half_pulse*speed/100
         for i in range (0,int(self.steps_per_rev*num)):
             GPIO.output(pin, True) #used instead of variable for speed
             time.sleep(hp) #again, directly entring num for speed
             GPIO.output(pin, False) #used instead of variable for speed
-            time.sleep(hp)        
+            time.sleep(hp) 
  
     def revFrame(self, num=1, speed=100):  #winds back one more than necessary, then forward to properly frame
         logging.debug("revFrame "+str(num))
@@ -77,15 +81,19 @@ class StepperCtrl():
         GPIO.output(self.dir_pin, self.dir_fwd)
         self.sleep()   
         
-    def start_thread(self):
+    def start_thread(self, fwd ):
         # start the thread to read frames from the video stream
-        self.thread = Thread(target=self.wind, args=(), daemon=True)
+        self.thread = Thread(target=self.wind, args=(fwd,), daemon=True)
         self.thread.start()
         return self
 
     # continuous operation
-        
-    def wind(self): # wind continuously until false flag, then sleep motor
+    
+    #wind for thread
+    def wind(self, fwd): # wind continuously until false flag, then sleep motor
+        self.wake()
+        print("wind", fwd)
+        self.set_dir(fwd)
         config.motor_running = True
         pin=self.pulse_pin  #directly accessing for speed
         hp=self.half_pulse
@@ -95,20 +103,27 @@ class StepperCtrl():
             time.sleep(hp) #again, directly entring num for speed
             GPIO.output(pin, False) #used instead of variable for speed
             time.sleep(hp)
+        self.sleep()
+        
+    def wind_cap(self): # wind continuously until false flag, then sleep motor
+#wind for capture only
+        config.motor_running = True
+        pin=self.pulse_pin  #directly accessing for speed
+        hp=self.half_pulse
+        while config.motor_running:
+            GPIO.output(pin, True) #used instead of variable for speed
+            time.sleep(hp) #again, directly entring num for speed
+            GPIO.output(pin, False) #used instead of variable for speed
+            time.sleep(hp)
 
         #print("motor stopped")
 
-    def fwd(self):
-        self.wake()
-        self.wind()
-        self.sleep()
-    
-    def rev(self):
-        self.wake()
-        GPIO.output(self.dir_pin, not self.dir_fwd) #change dir
-        self.wind(thread=True)
-        GPIO.output(self.dir_pin, self.dir_fwd) #change dir
-        self.sleep()
+    def set_dir(self, fwd=True):
+        #if fwd set pin to false
+        print("set_dir", fwd)
+        GPIO.output(self.dir_pin, not fwd)
+        
+        
         
 # ~ class StepperThread (Thread):
     # ~ def __init__(self):
@@ -160,6 +175,64 @@ class Capture:   #streamsandwrites - 1 thread
         self.camera.release()
         print(self.thread)
         print(self.thread == None)
+
+    def stop(self):
+        config.capture = False
+        
+class Capture2:   #streamsandwrites - 2 thread
+    def __init__(self, win, stepper, threading=True, fps_update=10):
+        # initialize the video camera
+        self.stream =  WebCamVideoStream().start()
+        self.res = self.stream.getres()
+        self.stepper = stepper
+        self.threading = threading
+        self.fps_update = fps_update  # update fps on gui every x frames
+        self.win =win
+        fourcc = cv2.VideoWriter_fourcc(*'FFV1')
+        self.out = cv2.VideoWriter('output.avi', fourcc, 24.0, self.res)
+
+
+    def start(self):
+        # start the thread to read frames from the video stream
+        if self.threading:
+            self.thread_cap = Thread(target=self.loop, args=(), daemon=True)
+            self.thread_cap.start()
+        else:
+            self.loop()
+        return self
+
+    def loop(self):
+        # keep looping infinitely until the thread is stopped
+        fps = FPS().start()
+        cnt =0   #frame count local
+        fps_update = self.fps_update
+        self.stepper.wake()
+        self.stepper.set_dir()
+        while config.capture:
+            self.stepper.wind_cap()     #winds until trigger
+            grab, frame, t = self.stream.grab_frame()
+            print(time.time() - t)
+            cnt += 1
+            #print("frame", cnt)
+            fps.update()
+            
+            self.out.write(frame)
+            
+            if config.stream and grab:
+                rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                h, w, ch = rgbImage.shape
+                bytesPerLine = ch * w
+                convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
+                img = convertToQtFormat.scaled(640, 480, Qt.KeepAspectRatio)
+                self.win.updateStream(img)
+
+            if cnt % fps_update == 0:
+                fps.stop()
+                self.win.setFps(str(round(fps.fps(), 1)))
+                fps = FPS().start() #restart fps
+                print(self.stream.get_fps())
+        self.stream.stop()
+        self.stepper.sleep()
 
     def stop(self):
         config.capture = False

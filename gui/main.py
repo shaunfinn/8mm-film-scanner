@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.uic import loadUi
 import time
 import RPi.GPIO as GPIO
-from control import StepperCtrl, Stream, Capture
+from control import StepperCtrl, Stream, Capture, Capture2
 
 config.motor_running= False
 config.trigger_cnt = 0
@@ -60,7 +60,7 @@ class MyWindow(QMainWindow):
     def m_ffwd(self):
         print("m_fwd")
         if not config.capture:
-            self.stepper.start_thread()
+            self.stepper.start_thread(fwd = True)
             #self.stepper.fwd()
         
         #self.stepper.windFrame()
@@ -68,7 +68,7 @@ class MyWindow(QMainWindow):
     def m_frev(self):
         print("m_frev")
         if not config.capture:
-            self.stepper.rev()
+            self.stepper.start_thread(fwd = False)
     
     
     def m_stop(self):
@@ -81,7 +81,7 @@ class MyWindow(QMainWindow):
     def m_startcap(self):
         config.capture = True
         print("start capture")
-        cap = Capture(win=self, stepper=self.stepper).start()
+        cap = Capture2(win=self, stepper=self.stepper).start()
     
     def m_stopcap(self):
         config.capture = False

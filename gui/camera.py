@@ -134,3 +134,4 @@ class CameraV4L2:
 		if write:
 			self.out.release()
 			print("video released")
+            
