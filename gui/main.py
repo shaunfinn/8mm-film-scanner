@@ -81,7 +81,7 @@ class MyWindow(QMainWindow):
     def m_startcap(self):
         config.capture = True
         print("start capture")
-        cap = Capture2(win=self, stepper=self.stepper).start()
+        cap = Capture(win=self, stepper=self.stepper).start()
     
     def m_stopcap(self):
         config.capture = False

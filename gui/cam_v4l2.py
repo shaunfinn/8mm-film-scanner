@@ -35,7 +35,7 @@ class cap_v4l2():
         # Create a buffer to store image data in. This must be done before
         # calling 'start' if v4l2capture is compiled with libv4l2. Otherwise
         # raises IOError.
-        self.video.create_buffers(30)
+        self.video.create_buffers(1)
 
         # Send the buffer to the device. Some devices require this to be done
         # before calling 'start'.

@@ -90,13 +90,13 @@ class StepperCtrl():
     # continuous operation
     
     #wind for thread
-    def wind(self, fwd): # wind continuously until false flag, then sleep motor
+    def wind(self, fwd=True, speed=100.0): # wind continuously until false flag, then sleep motor
         self.wake()
         print("wind", fwd)
         self.set_dir(fwd)
         config.motor_running = True
         pin=self.pulse_pin  #directly accessing for speed
-        hp=self.half_pulse
+        hp=self.half_pulse/speed*100.0
         #print("motor main loop")
         while config.motor_running:
             GPIO.output(pin, True) #used instead of variable for speed
@@ -105,11 +105,11 @@ class StepperCtrl():
             time.sleep(hp)
         self.sleep()
         
-    def wind_cap(self): # wind continuously until false flag, then sleep motor
-#wind for capture only
+    def wind_cap(self, speed=100.0): # wind continuously until false flag, then sleep motor
+        #wind for capture only
         config.motor_running = True
         pin=self.pulse_pin  #directly accessing for speed
-        hp=self.half_pulse
+        hp=self.half_pulse/speed*100.0
         while config.motor_running:
             GPIO.output(pin, True) #used instead of variable for speed
             time.sleep(hp) #again, directly entring num for speed
@@ -136,7 +136,7 @@ class StepperCtrl():
         
         
 class Capture:   #streamsandwrites - 1 thread
-    def __init__(self, win, stepper, threading=True, fps_update=50):
+    def __init__(self, win, stepper, threading=True, fps_update=10):
         # initialize the video camera
         self.camera =  CameraOpenCV(win=win,write=True)
         #self.stepper = StepperCtrl()
@@ -162,7 +162,7 @@ class Capture:   #streamsandwrites - 1 thread
         cnt =0   #frame count local
         fps_update = self.fps_update
         while config.capture:
-            self.stepper.wind()     #winds until trigger
+            self.stepper.wind_cap()     #winds until trigger
             self.camera.capture_frame()
             cnt += 1
             #print("frame", cnt)

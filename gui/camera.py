@@ -35,7 +35,8 @@ class CameraOpenCV:
 
 	def capture_frame(self):
 		#when capturing
-		return_value, frame = self.camera.read()
+		#eturn_value, frame = self.camera.read()
+		return_value, frame = self.camera.retrieve(self.camera.grab())
 		self.out.write(frame)
 
 		if config.stream:

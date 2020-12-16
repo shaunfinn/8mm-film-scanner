@@ -48,7 +48,7 @@ class WebCamVideoStream:
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 10000)
         
         self.t = time.time()
-        (self.grabbed, self.frame) = self.stream.read()
+        (self.grabbed, self.frame) = self.stream.retrieve(self.stream.grab())
         
 
         # initialize the variable used to inidicate if the thread 
