@@ -46,6 +46,7 @@ class MyWindow(QMainWindow):
         self.b_startcap.clicked.connect(self.m_startcap)
         self.b_stopcap.clicked.connect(self.m_stopcap)
 
+
         self.stepper = StepperCtrl()  
         
     def m_stream(self):
@@ -55,12 +56,12 @@ class MyWindow(QMainWindow):
             #if not capturing start stream (thread)
             self.stream = Stream(win=self).start()
 
-   
-    
+
     def m_ffwd(self):
         print("m_fwd")
         if not config.capture:
-            self.stepper.start_thread(fwd = True)
+            speed = self.sl_speed.value()
+            self.stepper.start_thread(fwd = True,speed=speed)
             #self.stepper.fwd()
         
         #self.stepper.windFrame()
@@ -68,7 +69,8 @@ class MyWindow(QMainWindow):
     def m_frev(self):
         print("m_frev")
         if not config.capture:
-            self.stepper.start_thread(fwd = False)
+            speed = self.sl_speed.value()
+            self.stepper.start_thread(fwd = False, speed=speed)
     
     
     def m_stop(self):
@@ -80,8 +82,9 @@ class MyWindow(QMainWindow):
         
     def m_startcap(self):
         config.capture = True
+        speed = self.sl_speed2.value()
         print("start capture")
-        cap = Capture(win=self, stepper=self.stepper).start()
+        cap = Capture(win=self, stepper=self.stepper, speed=speed).start()
     
     def m_stopcap(self):
         config.capture = False

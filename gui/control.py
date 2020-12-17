@@ -81,9 +81,9 @@ class StepperCtrl():
         GPIO.output(self.dir_pin, self.dir_fwd)
         self.sleep()   
         
-    def start_thread(self, fwd ):
-        # start the thread to read frames from the video stream
-        self.thread = Thread(target=self.wind, args=(fwd,), daemon=True)
+    def start_thread(self, fwd, speed ):
+        # start the thread for the motor
+        self.thread = Thread(target=self.wind, args=(fwd,speed), daemon=True)
         self.thread.start()
         return self
 
@@ -162,7 +162,7 @@ class Capture:   #streamsandwrites - 1 thread
         cnt =0   #frame count local
         fps_update = self.fps_update
         while config.capture:
-            self.stepper.wind_cap()     #winds until trigger
+            self.stepper.wind_cap(speed)     #winds until trigger
             self.camera.capture_frame()
             cnt += 1
             #print("frame", cnt)
@@ -180,7 +180,8 @@ class Capture:   #streamsandwrites - 1 thread
         config.capture = False
         
 class Capture2:   #streamsandwrites - 2 thread
-    def __init__(self, win, stepper, threading=True, fps_update=10):
+    #does seperate thread for continuously grabbing frames
+    def __init__(self, win, stepper, threading=True, fps_update=10, speed=100.0):
         # initialize the video camera
         self.stream =  WebCamVideoStream().start()
         self.res = self.stream.getres()
@@ -190,6 +191,7 @@ class Capture2:   #streamsandwrites - 2 thread
         self.win =win
         fourcc = cv2.VideoWriter_fourcc(*'FFV1')
         self.out = cv2.VideoWriter('output.avi', fourcc, 24.0, self.res)
+        self.speed = speed
 
 
     def start(self):
