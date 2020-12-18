@@ -48,18 +48,22 @@ class cap_v4l2():
         
     def start(self):
         fps = FPS()
-        with open('video.mjpg', 'wb') as f:
-            fps.start()
-            config.capture =True
-            while time.time() < self.stop_time : #stop_time >= time.time():
-                # Wait for the device to fill the buffer.
-                select.select((self.video,), (), ())
+        f = open('video.mjpg', 'wb')
+        
+        fps.start()
+        config.capture =True
+        while time.time() < self.stop_time : #stop_time >= time.time():
+            # Wait for the device to fill the buffer.
+            select.select((self.video,), (), ())
 
-                # The rest is easy :-)
-                image_data = self.video.read_and_queue()
-                f.write(image_data)
-                fps.update()
+            # The rest is easy :-)
+            image_data = self.video.read_and_queue()
+            f.write(image_data)
+            #print(image_data)
+            #print(type(image_data))
+            fps.update()
         fps.stop()
+        f.close()
         self.video.close()
         print("Saved video.mjpg (Size: " + str(self.size_x) + " x " + str(self.size_y) + ")")
         print("fps: ",fps.fps())

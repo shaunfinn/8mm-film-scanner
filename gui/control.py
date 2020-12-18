@@ -1,7 +1,7 @@
 import config
 import time 
 import RPi.GPIO as GPIO
-from camera import CameraOpenCV
+from camera import CameraOpenCV, CameraV4L2
 from threading import Thread
 from imutil import FPS, WebCamVideoStream
 
@@ -136,14 +136,16 @@ class StepperCtrl():
         
         
 class Capture:   #streamsandwrites - 1 thread
-    def __init__(self, win, stepper, threading=True, fps_update=10):
+    def __init__(self, win, stepper, threading=True, speed=100.0, fps_update=10):
         # initialize the video camera
-        self.camera =  CameraOpenCV(win=win,write=True)
+        #self.camera =  CameraOpenCV(win=win,write=True)
+        self.camera =  CameraV4L2(win=win,write=True)
         #self.stepper = StepperCtrl()
         self.stepper = stepper
         self.threading = threading
         self.fps_update = fps_update  # update fps on gui every x frames
         self.win =win
+        self.speed = speed
 
 
     def start(self):
@@ -162,7 +164,7 @@ class Capture:   #streamsandwrites - 1 thread
         cnt =0   #frame count local
         fps_update = self.fps_update
         while config.capture:
-            self.stepper.wind_cap(speed)     #winds until trigger
+            self.stepper.wind_cap(self.speed)     #winds until trigger
             self.camera.capture_frame()
             cnt += 1
             #print("frame", cnt)
@@ -173,11 +175,10 @@ class Capture:   #streamsandwrites - 1 thread
                 self.win.setFps(str(round(fps.fps(), 1)))
                 fps = FPS().start() #restart fps
         self.camera.release()
-        print(self.thread)
-        print(self.thread == None)
 
     def stop(self):
         config.capture = False
+        
         
 class Capture2:   #streamsandwrites - 2 thread
     #does seperate thread for continuously grabbing frames
@@ -251,7 +252,8 @@ class Stream:
     def start(self):
         # start the thread to read frames from the video stream
         if self.threading:
-            Thread(target=self.camera.stream(), args=(), daemon=True).start()
+            print("stream thread started")
+            Thread(target=self.camera.stream, args=(), daemon=True).start()
         else:
             self.camera.stream
         return self

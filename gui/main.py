@@ -20,7 +20,7 @@ config.stream =False
 def triggerUpdate(channel):
 	if config.capture:
 		#delay before stopping motor, so trigger passes gate completely
-		time.sleep(0.1)   # value for 8000 pulse freq
+		time.sleep(0.05)   # value for 8000 pulse freq
 		config.motor_running = False
 
 
@@ -54,6 +54,7 @@ class MyWindow(QMainWindow):
         config.stream = not config.stream
         if not config.capture and config.stream:
             #if not capturing start stream (thread)
+            print("stream only started")
             self.stream = Stream(win=self).start()
 
 
@@ -101,7 +102,9 @@ class MyWindow(QMainWindow):
         
     #@qtc.pyqtSlot(qtg.QImage)
     def updateStream(self, img):
+        print("updateStream method")
         self.l_img.setPixmap(QPixmap.fromImage(img))
+        print("updateStream done")
 
 if __name__ == "__main__":
     app = QApplication([])
