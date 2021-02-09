@@ -80,7 +80,7 @@ class CameraV4L2:
 
 		# Suggest an image size to the device. The device may choose and
 		# return another size if it doesn't support the suggested one.
-		self.size_x, self.size_y = self.video.set_format(1920, 1080, fourcc='FFV1')
+		self.size_x, self.size_y = self.video.set_format(1920, 1080, fourcc='MJPG')
 		self.video.set_fps(60)
 
 		# Create a buffer to store image data in. This must be done before
@@ -95,6 +95,7 @@ class CameraV4L2:
 		# Start the device. This lights the LED if it's a camera that has one.
 		self.video.start()
 		
+        #original ext ".mjpg"
 		if self.write:
 			self.f = open('video.mjpg', 'wb')
 

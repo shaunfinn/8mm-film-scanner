@@ -85,7 +85,7 @@ class MyWindow(QMainWindow):
         config.capture = True
         speed = self.sl_speed2.value()
         print("start capture")
-        cap = Capture(win=self, stepper=self.stepper, speed=speed).start()
+        cap = Capture(win=self, stepper=self.stepper, speed=speed, cap_type="opencv").start()
     
     def m_stopcap(self):
         config.capture = False

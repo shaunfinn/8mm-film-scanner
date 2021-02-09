@@ -136,10 +136,12 @@ class StepperCtrl():
         
         
 class Capture:   #streamsandwrites - 1 thread
-    def __init__(self, win, stepper, threading=True, speed=100.0, fps_update=10):
+    def __init__(self, win, stepper, threading=True, speed=100.0, fps_update=10, cap_type="v4l"):
         # initialize the video camera
-        #self.camera =  CameraOpenCV(win=win,write=True)
-        self.camera =  CameraV4L2(win=win,write=True)
+        if cap_type == "opencv":
+            self.camera =  CameraOpenCV(win=win,write=True)
+        else:
+            self.camera =  CameraV4L2(win=win,write=True)
         #self.stepper = StepperCtrl()
         self.stepper = stepper
         self.threading = threading
