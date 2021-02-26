@@ -244,22 +244,30 @@ class Capture2:   #streamsandwrites - 2 thread
 
 
 class Stream:
-    def __init__(self, win, threading=True):
+    def __init__(self, win, threading=False):
         # initialize the video camera
+        # threading option not working so defaults to False
         self.camera = CameraOpenCV(win=win, stream_only=True)
         self.threading =threading
-
-        #self.fps_update = fps_update  # update fps on gui every x frames
 
     def start(self):
         # start the thread to read frames from the video stream
         if self.threading:
             print("stream thread started")
-            Thread(target=self.camera.stream, args=(), daemon=True).start()
+            Thread(target=self.loop, args=(), daemon=True).start()
         else:
-            self.camera.stream
+            self.camera.stream()
         return self
-
+        
+    def loop(self):
+        # keep looping infinitely until the thread is stopped
+        while config.stream:
+            print("camera stream loop")
+            valid, frame = self.camera.camera.retrieve(self.camera.camera.grab())
+            if valid:
+                self.camera.stream_frame(frame)
+        self.release()
+            
 
 
 
